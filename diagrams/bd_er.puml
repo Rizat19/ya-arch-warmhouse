@@ -1,0 +1,168 @@
+@startuml
+hide circle
+
+' === AuthDb ===
+package "AuthDb" {
+  entity "users" as Users {
+    * id            : UUID <<PK>>
+    --
+      username      : VARCHAR(255)
+      email         : VARCHAR(255)
+      password_hash : TEXT
+      created_at    : TIMESTAMPTZ
+      updated_at    : TIMESTAMPTZ
+  }
+
+  entity "tokens" as Tokens {
+    * id         : UUID <<PK>>
+    --
+      user_id    : UUID <<FK>>
+      token      : TEXT
+      expires_at : TIMESTAMPTZ
+      created_at : TIMESTAMPTZ
+  }
+}
+
+' === DeviceDb ===
+package "DeviceDb" {
+  entity "houses" as Houses {
+    * id         : UUID <<PK>>
+    --
+      user_id    : UUID <<FK>>
+      name       : VARCHAR(255)
+      address    : TEXT
+      created_at : TIMESTAMPTZ
+      updated_at : TIMESTAMPTZ
+  }
+
+  entity "device_types" as DeviceTypes {
+    * id          : UUID <<PK>>
+    --
+      name        : VARCHAR(255)
+      protocol    : VARCHAR(100)
+      description : TEXT
+      created_at  : TIMESTAMPTZ
+  }
+
+  entity "modules" as Modules {
+    * id          : UUID <<PK>>
+    --
+      name        : VARCHAR(255)
+      description : TEXT
+      created_at  : TIMESTAMPTZ
+  }
+
+  entity "device_type_modules" as DeviceTypeModules {
+    * device_type_id : UUID <<PK,FK>>
+    * module_id      : UUID <<PK,FK>>
+  }
+
+  entity "devices" as Devices {
+    * id            : UUID <<PK>>
+    --
+      type_id       : UUID <<FK>>
+      house_id      : UUID <<FK>>
+      serial_number : VARCHAR(255)
+      status        : VARCHAR(50)
+      registered_at : TIMESTAMPTZ
+      updated_at    : TIMESTAMPTZ
+  }
+}
+
+' === HeatingDb ===
+package "HeatingDb" {
+  entity "heating_devices" as HeatingDevices {
+    * id         : UUID <<PK>>
+    --
+      device_id  : UUID <<FK>>
+      name       : VARCHAR(255)
+      config     : JSONB
+      created_at : TIMESTAMPTZ
+      updated_at : TIMESTAMPTZ
+  }
+
+  entity "heating_schedules" as HeatingSchedules {
+    * id                  : UUID <<PK>>
+    --
+      heating_device_id   : UUID <<FK>>
+      cron_expression     : VARCHAR(100)
+      target_temperature  : NUMERIC(5,2)
+      created_at          : TIMESTAMPTZ
+      updated_at          : TIMESTAMPTZ
+  }
+}
+
+' === LightingDb ===
+package "LightingDb" {
+  entity "lighting_devices" as LightingDevices {
+    * id         : UUID <<PK>>
+    --
+      device_id  : UUID <<FK>>
+      name       : VARCHAR(255)
+      config     : JSONB
+      created_at : TIMESTAMPTZ
+      updated_at : TIMESTAMPTZ
+  }
+
+  entity "lighting_schedules" as LightingSchedules {
+    * id                  : UUID <<PK>>
+    --
+      lighting_device_id  : UUID <<FK>>
+      cron_expression     : VARCHAR(100)
+      state_on            : BOOLEAN
+      created_at          : TIMESTAMPTZ
+      updated_at          : TIMESTAMPTZ
+  }
+}
+
+' === GateDb ===
+package "GateDb" {
+  entity "gate_devices" as GateDevices {
+    * id         : UUID <<PK>>
+    --
+      device_id  : UUID <<FK>>
+      name       : VARCHAR(255)
+      config     : JSONB
+      created_at : TIMESTAMPTZ
+      updated_at : TIMESTAMPTZ
+  }
+
+  entity "gate_schedules" as GateSchedules {
+    * id               : UUID <<PK>>
+    --
+      gate_device_id   : UUID <<FK>>
+      cron_expression  : VARCHAR(100)
+      action           : VARCHAR(50)
+      created_at       : TIMESTAMPTZ
+      updated_at       : TIMESTAMPTZ
+  }
+}
+
+' === TelemetryDb ===
+package "TelemetryDb" {
+  entity "telemetry_records" as TelemetryRecords {
+    * id          : BIGSERIAL <<PK>>
+    --
+      device_id   : UUID <<FK>>
+      sensor_type : VARCHAR(100)
+      value       : JSONB
+      timestamp   : TIMESTAMPTZ
+  }
+}
+
+' === Связи ===
+Users       ||--o{ Tokens              : "owns"
+Users       ||--o{ Houses              : "has"
+Houses      ||--o{ Devices             : "contains"
+DeviceTypes ||--o{ DeviceTypeModules   : "maps"
+Modules     ||--o{ DeviceTypeModules   : "maps"
+DeviceTypes ||--o{ Devices             : "defines"
+Devices     ||--o{ HeatingDevices      : "extends"
+HeatingDevices ||--o{ HeatingSchedules : "schedules"
+Devices     ||--o{ LightingDevices     : "extends"
+LightingDevices ||--o{ LightingSchedules : "schedules"
+Devices     ||--o{ GateDevices         : "extends"
+GateDevices ||--o{ GateSchedules       : "schedules"
+Devices     ||--o{ TelemetryRecords    : "records"
+
+@enduml

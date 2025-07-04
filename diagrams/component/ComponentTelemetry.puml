@@ -1,0 +1,19 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(Telemetry, "Telemetry Service") {
+  Container(TelemetryService, "Telemetry Service", "Go")
+}
+
+Container(TelemetryService, "Telemetry Service", "Go") {
+  Component(TelemetryAPI, "Telemetry API", "Отдаёт исторические и текущие данные телеметрии")
+  Component(DataIngestor, "Data Ingestor", "Подписывается на потоки сырых данных от сенсоров")
+  Component(DataProcessor, "Data Processor", "Нормализует, фильтрует и агрегирует входящие данные")
+  Component(TelemetryRepository,"Telemetry Repository", "Сохраняет телеметрию")
+}
+
+Rel(TelemetryAPI, TelemetryRepository, "Читает данные для формирования ответов API")
+Rel(DataIngestor, DataProcessor, "Передаёт необработанные данные с датчиков")
+Rel(DataProcessor, TelemetryRepository, "Сохраняет обработанную телеметрию")
+
+@enduml

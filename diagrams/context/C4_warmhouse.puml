@@ -1,0 +1,16 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Smart Home System Diagram
+
+Person(customer, "Smart Home Customer")
+
+System(monolith, "Smart Home System", "Монолитное Go-App: управление отоплением и мониторинг температуры")
+
+System_Ext(smart_devices_system, "Smart Devices System", "Управляет умными устройствами")
+System_Ext(sensor_api_system, "Sensor Api System", "Управляет датчиками и считывает температуру")
+
+Rel(customer, monolith, "Отправляет команды вкл/выкл отопления, просматривает текущую температуру")
+Rel(monolith, smart_devices_system, "Отправляет команду «включить/выключить отопление»")
+Rel(monolith, sensor_api_system, "Запрашивает данные о температуре")
+@enduml

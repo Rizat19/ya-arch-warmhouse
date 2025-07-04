@@ -1,0 +1,15 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(authService, "Auth Service", "Go") {
+  Component(AuthAPI, "Auth API", "Обработка регистрации, аутентификации и запросов авторизации пользователей")
+  Component(TokenService, "Token Service", "Генерация, верификация и обновление токенов доступа")
+  Component(UserService, "User Service", "Управление профилями пользователей и их учётными данными")
+  Component(AuthRepository, "Auth Repository", "Хранение информации о пользователях и токенах в базе данных")
+}
+
+Rel(AuthAPI, UserService, "Обращается за данными пользователей")
+Rel(AuthAPI, TokenService, "Запросы на выпуск и проверку токенов")
+Rel(TokenService, AuthRepository, "Чтение и запись данных токенов")
+Rel(UserService, AuthRepository, "Чтение и запись данных пользователей")
+@enduml
