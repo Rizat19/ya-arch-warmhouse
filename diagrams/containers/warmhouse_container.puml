@@ -12,6 +12,7 @@ System_Boundary(SmartHome, "Smart Home System") {
   System(LightingService, "Lighting Service", "Управление освещением в помещениях")
   System(HeatingService, "Heating Service", "Управление отоплением и температурными режимами")
   System(TelemetryService, "Telemetry Service", "Сбор, хранение и анализ телеметрических данных от устройств")
+  System(MessageBroker, "MQTT Broker", "Асинхронная передача сообщений между сервисами и устройствами")
 
   SystemDb(AuthDb, "Auth Database", "PostgreSQL — хранение учётных записей и токенов")
   SystemDb(DeviceDb, "Device Database", "PostgreSQL — конфигурации и состояние устройств")
@@ -38,7 +39,11 @@ Rel(HeatingService, HeatingDb, "Чтение и запись настроек о
 Rel(LightingService, LightingDb, "Чтение и запись настроек освещения")
 Rel(TelemetryService, TelemetryDb, "Сохранение телеметрии")
 
-Rel(HeatingService, HeatingActuator, "Отправка команд управления")
-Rel(LightingService, LightActuator, "Отправка команд управления")
-Rel(TelemetryService, SensorDevices, "Получение данных с датчиков")
+Rel(HeatingService, MessageBroker, "Публикация команд (MQTT topic)", "MQTT")
+Rel(LightingService, MessageBroker, "Публикация команд (MQTT topic)", "MQTT")
+Rel(SensorDevices, MessageBroker, "Публикация телеметрии", "MQTT")
+Rel(MessageBroker, TelemetryService, "Подписка на телеметрию", "MQTT")
+Rel(MessageBroker, HeatingActuator, "Подписка на команды", "MQTT")
+Rel(MessageBroker, LightActuator, "Подписка на команды", "MQTT")
+
 @enduml

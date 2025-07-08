@@ -81,8 +81,12 @@
 ```
 
 **Диаграмма кода (Code)**
+- [Auth code](./diagrams/codes/CodeAuth.puml)
+- [Device code](./diagrams/codes/CodeDevice.puml)
+- [Heating code](./diagrams/codes/CodeHeating.puml)
+- [Lighting code](./diagrams/codes/CodeLighting.puml)
+- [Telemetry code](./diagrams/codes/CodeTelemetry.puml)
 
-Добавьте одну диаграмму или несколько.
 
 # Задание 3. Разработка ER-диаграммы
 
@@ -92,13 +96,44 @@
 
 # Задание 4. Создание и документирование API
 
-### 1. Тип API
+## 1. Тип API
 
-Укажите, какой тип API вы будете использовать для взаимодействия микросервисов. Объясните своё решение.
+Тип API: RESTful API (HTTP + JSON) с использованием OpenAPI 3.0.3.
 
-### 2. Документация API
+Обоснование выбора:
 
-Здесь приложите ссылки на документацию API для микросервисов, которые вы спроектировали в первой части проектной работы. Для документирования используйте Swagger/OpenAPI или AsyncAPI.
+- REST API — это простой и понятный способ взаимодействия между микросервисами.
+- HTTP и JSON позволяют легко интегрировать системы.
+- OpenAPI 3.0.3 используется для документирования.
+- Для передачи команд на устройства используется также брокер сообщений (MQTT), но основной обмен идёт через REST API.
+
+## 2. Документация API
+
+Документация подготовлена в формате OpenAPI 3.0.3 и охватывает следующие микросервисы:
+
+### Auth Service
+- `GET /auth/login` — вход пользователя
+- `GET /auth/logout` — выход пользователя
+
+### Device Service
+- `POST /device` — создать устройство
+- `GET /device/{uuid}` — получить устройство
+- `PUT /device/{uuid}` — обновить устройство
+- `DELETE /device/{uuid}` — удалить устройство
+- `POST /device/{uuid}/command` — отправить команду на устройство
+
+### Telemetry Service
+- `POST /telemetry` — создать запись телеметрии
+- `GET /telemetry/{uuid}` — получить запись по UUID
+
+### Heating Service
+- `POST /heating/{device_uuid}/set` — установить температуру
+
+### Lighting Service
+- `POST /lighting/{device_uuid}/set` — включить/выключить свет или изменить яркость
+
+## Ссылка на OpenAPI
+[openapi.yaml](./diagrams/openapi.yaml)
 
 # Задание 5. Работа с docker и docker-compose
 
