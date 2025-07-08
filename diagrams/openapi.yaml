@@ -1,0 +1,335 @@
+openapi: 3.0.3
+info:
+  title: Swagger Smart Home - OpenAPI 3.0
+  description: This is an OpenAPI 3.0 specification for Smart Home.
+  version: 0.0.1
+servers:
+  - url: https://swagger.smart_home.com/api/v1
+tags:
+  - name: auth
+    description: Auth for Smart Home
+  - name: house
+    description: Users house
+  - name: device
+    description: Devices in house
+  - name: telemetry
+    description: Device telemetry record
+  - name: heating
+    description: Heating management
+  - name: lighting
+    description: Lighting management
+paths:
+  /auth/login:
+    get:
+      tags:
+        - auth
+      summary: Logs user into the system
+      operationId: loginUser
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid email/password supplied
+        '500':
+          description: Internal server error
+
+  /auth/logout:
+    get:
+      tags:
+        - auth
+      summary: Logs out current user
+      operationId: logoutUser
+      responses:
+        '200':
+          description: successful logout
+        '500':
+          description: Internal server error
+
+  /house:
+    post:
+      tags:
+        - house
+      summary: Create house
+      operationId: createHouse
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/House'
+      responses:
+        '200':
+          description: House created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+        '500':
+          description: Internal server error
+
+  /house/{uuid}:
+    get:
+      tags:
+        - house
+      summary: Get house by UUID
+      operationId: getHouseByUuid
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+        '404':
+          description: House not found
+        '500':
+          description: Internal server error
+
+  /device:
+    post:
+      tags:
+        - device
+      summary: Create device
+      operationId: createDevice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        '200':
+          description: Device created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '500':
+          description: Internal server error
+
+  /device/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - device
+      summary: Get device by UUID
+      operationId: getDeviceByUuid
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Device not found
+    put:
+      tags:
+        - device
+      summary: Update device
+      operationId: updateDevice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        '200':
+          description: Device updated
+        '404':
+          description: Device not found
+    delete:
+      tags:
+        - device
+      summary: Delete device
+      operationId: deleteDevice
+      responses:
+        '200':
+          description: Device deleted
+        '404':
+          description: Device not found
+
+  /device/{uuid}/command:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - device
+      summary: Send command to device
+      operationId: sendDeviceCommand
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCommand'
+      responses:
+        '200':
+          description: Command sent successfully
+        '404':
+          description: Device not found
+
+  /telemetry:
+    post:
+      tags:
+        - telemetry
+      summary: Create telemetry record
+      operationId: createTelemetry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Telemetry'
+      responses:
+        '200':
+          description: Telemetry created
+        '500':
+          description: Internal server error
+
+  /telemetry/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - telemetry
+      summary: Get telemetry record
+      operationId: getTelemetry
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Telemetry'
+        '404':
+          description: Record not found
+
+  /heating/{device_uuid}/set:
+    parameters:
+      - name: device_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - heating
+      summary: Set heating config
+      operationId: setHeating
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                config:
+                  type: string
+      responses:
+        '200':
+          description: Heating config applied
+
+  /lighting/{device_uuid}/set:
+    parameters:
+      - name: device_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - lighting
+      summary: Set lighting state
+      operationId: setLighting
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                state:
+                  type: string
+      responses:
+        '200':
+          description: Lighting state set
+
+components:
+  schemas:
+    House:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        address:
+          type: string
+    Device:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        home_uuid:
+          type: string
+          format: uuid
+        deviceType:
+          type: integer
+        connect_url:
+          type: string
+        status:
+          type: string
+    DeviceCommand:
+      type: object
+      properties:
+        command:
+          type: string
+    Telemetry:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        device_uuid:
+          type: string
+          format: uuid
+        data:
+          type: string
+        create_epoch:
+          type: integer
+          format: int64

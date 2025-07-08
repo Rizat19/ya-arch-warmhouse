@@ -1,0 +1,16 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(lightingService, "Lighting Service", "Go", "Сервис управления освещением в умном доме") {
+  Component(LightingAPI, "Lighting API", "Обработка REST API управления освещением и предоставление статуса")
+  Component(CommandHandler, "Command Handler", "Валидация и выполнение команд управления освещением")
+  Component(LightingRepository, "Lighting Repository", "Доступ к конфигурациям освещения в lightingDb")
+  Component(EventPublisher, "Event Publisher", "Публикация управляющих событий для внешних подписчиков")
+  Component(ActuatorAdapter, "Actuator Adapter", "Отправка команд освещения на исполнительные устройства (через MQTT)")
+}
+
+Rel(LightingAPI, CommandHandler, "Вызывает бизнес-логику управления")
+Rel(CommandHandler, LightingRepository, "Чтение и запись конфигураций")
+Rel(CommandHandler, EventPublisher, "Публикация событий управления")
+Rel(EventPublisher, ActuatorAdapter, "Передача команд по MQTT")
+@enduml

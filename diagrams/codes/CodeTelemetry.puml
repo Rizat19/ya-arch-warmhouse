@@ -1,0 +1,66 @@
+@startuml
+package "telemetry" {
+
+    class TelemetryAPI {
+        - service : TelemetryService
+        <<constructor>> TelemetryAPI(service_ : TelemetryService)
+        + create(telemetry_dto: TelemetryDTO)
+        + get(uuid: UUID)
+    }
+
+    interface TelemetryService {
+        + {abstract} create(telemetry_dto: TelemetryDTO)
+        + {abstract} get(uuid: UUID)
+    }
+
+    class TelemetryServiceImpl implements TelemetryService {
+        - repository : TelemetryRepository
+        - processor : DataProcessor
+        <<constructor>> TelemetryServiceImpl(repository_ : TelemetryRepository, processor_ : DataProcessor)
+        + create(telemetry_dto: TelemetryDTO)
+        + get(uuid: UUID)
+    }
+
+    class DataProcessor {
+        - workers_pool : WorkersPool
+        + process(raw_data: string)
+    }
+
+    interface WorkersPool {
+        + {abstract} get()
+    }
+
+    class WorkersPoolImpl implements WorkersPool {
+        <<constructor>> WorkersPoolImpl(workers_count : int)
+        + get()
+    }
+
+    interface TelemetryRepository {
+        + {abstract} create(telemetry_entity: TelemetryEntity)
+        + {abstract} get(uuid: UUID)
+    }
+
+    struct TelemetryDTO {
+        device_uuid : UUID
+        data : string
+    }
+
+    struct TelemetryEntity {
+        uuid : UUID
+        device_uuid : UUID
+        data : string
+    }
+
+    TelemetryService <|.. TelemetryServiceImpl
+    WorkersPool <|.. WorkersPoolImpl
+
+    TelemetryAPI::service *-- TelemetryService
+    TelemetryAPI::create <.. TelemetryDTO
+    TelemetryService::create <.. TelemetryDTO
+    TelemetryServiceImpl::create <.. TelemetryDTO
+    TelemetryServiceImpl::repository *-- TelemetryRepository
+    TelemetryServiceImpl::processor *-- DataProcessor
+    DataProcessor::workers_pool *-- WorkersPool
+    TelemetryRepository::create <.. TelemetryEntity
+}
+@enduml

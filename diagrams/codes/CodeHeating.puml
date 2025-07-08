@@ -1,0 +1,69 @@
+@startuml
+package "heating" {
+
+    class HeatingController {
+        - service : HeatingService
+        <<constructor>> HeatingController(service_ : HeatingService)
+        + set_temperature(temp: float)
+        + get_status() : HeatingStatusDTO
+    }
+
+    interface HeatingService {
+        + {abstract} set_temperature(temp: float)
+        + {abstract} get_status() : HeatingStatusDTO
+    }
+
+    class HeatingServiceImpl implements HeatingService {
+        - repository : HeatingRepository
+        - publisher : EventPublisher
+        <<constructor>> HeatingServiceImpl(repository_ : HeatingRepository, publisher_ : EventPublisher)
+        + set_temperature(temp: float)
+        + get_status() : HeatingStatusDTO
+    }
+
+    interface HeatingRepository {
+        + {abstract} save_config(cfg: HeatingConfigDTO)
+        + {abstract} load_config() : HeatingConfigDTO
+    }
+
+    interface EventPublisher {
+        + {abstract} publish_set_temperature_event(temp: float)
+    }
+
+    class EventPublisherImpl implements EventPublisher {
+        - actuator : ActuatorAdapter
+        <<constructor>> EventPublisherImpl(actuator_ : ActuatorAdapter)
+        + publish_set_temperature_event(temp: float)
+    }
+
+    interface ActuatorAdapter {
+        + {abstract} send_temperature_command(temp: float)
+    }
+
+    struct HeatingStatusDTO {
+        temperature : float
+        mode : string
+    }
+
+    struct HeatingConfigDTO {
+        target_temperature : float
+        schedule : string
+    }
+
+    HeatingController::service *-- HeatingService
+    HeatingController::set_temperature <.. HeatingStatusDTO
+    HeatingController::get_status <.. HeatingStatusDTO
+
+    HeatingServiceImpl::repository *-- HeatingRepository
+    HeatingServiceImpl::publisher *-- EventPublisher
+    HeatingService <|.. HeatingServiceImpl
+
+    EventPublisherImpl::actuator *-- ActuatorAdapter
+    EventPublisher <|.. EventPublisherImpl
+
+    HeatingRepository::save_config <.. HeatingConfigDTO
+    HeatingRepository::load_config <.. HeatingConfigDTO
+    HeatingServiceImpl::get_status <.. HeatingStatusDTO
+}
+
+@enduml

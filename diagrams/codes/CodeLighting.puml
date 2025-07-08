@@ -1,0 +1,69 @@
+@startuml
+package "lighting" {
+
+    class LightingController {
+        - service : LightingService
+        <<constructor>> LightingController(service_ : LightingService)
+        + set_brightness(brightness: int)
+        + get_status(): LightingStatusDTO
+    }
+
+    interface LightingService {
+        + {abstract} set_brightness(brightness: int)
+        + {abstract} get_status(): LightingStatusDTO
+    }
+
+    class LightingServiceImpl implements LightingService {
+        - repository : LightingRepository
+        - publisher : EventPublisher
+        <<constructor>> LightingServiceImpl(repository_ : LightingRepository, publisher_ : EventPublisher)
+        + set_brightness(brightness: int)
+        + get_status(): LightingStatusDTO
+    }
+
+    interface LightingRepository {
+        + {abstract} save_config(cfg: LightingConfigDTO)
+        + {abstract} load_config(): LightingConfigDTO
+    }
+
+    interface EventPublisher {
+        + {abstract} publish_brightness_event(brightness: int)
+    }
+
+    class EventPublisherImpl implements EventPublisher {
+        - actuator : ActuatorAdapter
+        <<constructor>> EventPublisherImpl(actuator_ : ActuatorAdapter)
+        + publish_brightness_event(brightness: int)
+    }
+
+    interface ActuatorAdapter {
+        + {abstract} send_brightness_command(brightness: int)
+    }
+
+    struct LightingStatusDTO {
+        brightness : int
+        mode : string
+    }
+
+    struct LightingConfigDTO {
+        default_brightness : int
+        schedule : string
+    }
+
+    LightingService <|.. LightingServiceImpl
+    EventPublisher <|.. EventPublisherImpl
+
+    LightingController::service *-- LightingService
+    LightingController::set_brightness <.. LightingStatusDTO
+    LightingController::get_status <.. LightingStatusDTO
+
+    LightingServiceImpl::repository *-- LightingRepository
+    LightingServiceImpl::publisher *-- EventPublisher
+
+    EventPublisherImpl::actuator *-- ActuatorAdapter
+
+    LightingRepository::save_config <.. LightingConfigDTO
+    LightingRepository::load_config <.. LightingConfigDTO
+    LightingServiceImpl::get_status <.. LightingStatusDTO
+}
+@enduml

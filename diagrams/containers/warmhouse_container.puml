@@ -1,0 +1,49 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(User, "Пользователь", "Управляет умным домом через веб или мобильное приложение")
+
+System_Boundary(SmartHome, "Smart Home System") {
+
+  System(WebApp, "Web/Mobile UI", "Интерфейс самообслуживания")
+  System(ApiGateway, "API Gateway", "Централизованная точка входа")
+  System(AuthService, "Auth Service", "Регистрация, аутентификация и управление токенами доступа")
+  System(DeviceService, "Device Service", "Регистрация и управление устройствами в системе")
+  System(LightingService, "Lighting Service", "Управление освещением в помещениях")
+  System(HeatingService, "Heating Service", "Управление отоплением и температурными режимами")
+  System(TelemetryService, "Telemetry Service", "Сбор, хранение и анализ телеметрических данных от устройств")
+  System(MessageBroker, "MQTT Broker", "Асинхронная передача сообщений между сервисами и устройствами")
+
+  SystemDb(AuthDb, "Auth Database", "PostgreSQL — хранение учётных записей и токенов")
+  SystemDb(DeviceDb, "Device Database", "PostgreSQL — конфигурации и состояние устройств")
+  SystemDb(LightingDb, "Light Database", "PostgreSQL — сценарии и параметры освещения")
+  SystemDb(HeatingDb, "Heating Database", "PostgreSQL — параметры и расписания отопления")
+  SystemDb(TelemetryDb, "Telemetry Database", "PostgreSQL — телеметрические данные с устройств")
+}
+
+System_Ext(LightActuator, "Light Actuator", "Внешние исполнительные устройства для управления освещением")
+System_Ext(HeatingActuator, "Heating Actuator", "Внешние исполнительные устройства для управления отоплением")
+System_Ext(SensorDevices, "Sensor Devices", "Датчики температуры, движения и других параметров среды")
+
+Rel(User, WebApp, "Взаимодействует через UI")
+Rel(WebApp, ApiGateway, "REST API")
+Rel(ApiGateway, AuthService, "OAuth2.0 / JWT")
+Rel(ApiGateway, DeviceService, "REST")
+Rel(ApiGateway, HeatingService, "REST")
+Rel(ApiGateway, LightingService, "REST")
+Rel(ApiGateway, TelemetryService, "REST")
+
+Rel(AuthService, AuthDb, "Чтение и запись аккаунтов и токенов")
+Rel(DeviceService, DeviceDb, "Чтение и запись данных устройств")
+Rel(HeatingService, HeatingDb, "Чтение и запись настроек отопления")
+Rel(LightingService, LightingDb, "Чтение и запись настроек освещения")
+Rel(TelemetryService, TelemetryDb, "Сохранение телеметрии")
+
+Rel(HeatingService, MessageBroker, "Публикация команд (MQTT topic)", "MQTT")
+Rel(LightingService, MessageBroker, "Публикация команд (MQTT topic)", "MQTT")
+Rel(SensorDevices, MessageBroker, "Публикация телеметрии", "MQTT")
+Rel(MessageBroker, TelemetryService, "Подписка на телеметрию", "MQTT")
+Rel(MessageBroker, HeatingActuator, "Подписка на команды", "MQTT")
+Rel(MessageBroker, LightActuator, "Подписка на команды", "MQTT")
+
+@enduml
